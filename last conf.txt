@@ -1,0 +1,63 @@
+crypto isakmp policy 1
+ encr aes 256
+ authentication pre-share
+ group 5
+!
+crypto isakmp key cisco123 address 193.10.10.2
+!
+!
+!
+crypto ipsec transform-set strong esp-3des esp-md5-hmac
+!
+crypto map VPN 10 ipsec-isakmp 
+ set peer 193.10.10.2
+ set transform-set strong 
+ match address IPsec
+!
+!
+!
+!
+!
+!
+spanning-tree mode pvst
+!
+!
+!
+!
+!
+!
+interface FastEthernet0/0
+ ip address 193.20.20.2 255.255.255.252
+ ip nat outside
+ duplex auto
+ speed auto
+ crypto map VPN
+!
+interface FastEthernet0/1
+ ip address 192.168.2.1 255.255.255.0
+ ip nat inside
+ duplex auto
+ speed auto
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+ip nat inside source list NONAT interface FastEthernet0/0 overload
+ip classless
+ip route 0.0.0.0 0.0.0.0 193.20.20.1 
+!
+ip flow-export version 9
+!
+!
+ip access-list extended IPsec
+ permit ip 192.168.2.0 0.0.0.255 192.168.1.0 0.0.0.255
+ip access-list extended NONAT
+ deny ip 192.168.2.0 0.0.0.255 192.168.1.0 0.0.0.255
+ permit ip 192.168.2.0 0.0.0.255 any
+
+
+
+
+
+

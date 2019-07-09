@@ -1,0 +1,53 @@
+http://duconet.com/ipsec-crypto-maps-gre-vti/
+
+
+ZAGREB - konfa
+
+crypto isakmp policy 1
+ encr aes 256
+ authentication pre-share
+ group 5
+!
+crypto isakmp key cisco123 address 193.20.20.2
+!
+!
+crypto ipsec transform-set STRONG esp-3des esp-md5-hmac
+!
+crypto map VPN 10 ipsec-isakmp 
+ set peer 193.20.20.2
+ set transform-set STRONG 
+ match address GRE
+!
+!
+interface Tunnel1
+ description Tunnel to Osijek
+ ip address 10.10.10.1 255.255.255.0
+ mtu 1476
+ tunnel source FastEthernet0/0
+ tunnel destination 193.20.20.2
+!
+!
+interface FastEthernet0/0
+ ip address 193.10.10.2 255.255.255.252
+ duplex auto
+ speed auto
+ crypto map VPN
+!
+interface FastEthernet0/1
+ ip address 192.168.1.1 255.255.255.0
+ duplex auto
+ speed auto
+!
+!
+router rip
+ version 2
+ network 192.168.1.0
+ network 10.0.0.0
+ no auto-summary
+!
+ip classless
+ip route 193.20.20.0 255.255.255.252 193.10.10.1 
+!
+!
+ip access-list extended GRE
+ permit gre host 193.10.10.2 host 193.20.20.2

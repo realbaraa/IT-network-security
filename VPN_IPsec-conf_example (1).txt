@@ -1,0 +1,24 @@
+1. ACL za IPsec tunnel
+ip access-list extended IPsec
+permit ip 192.168.1.0 0.0.0.255 192.168.2.0 0.0.0.255
+
+2. ISAKMP policy (Internet Security Association and Key Management Protocol)
+2.1. ISAKMP key (Phase 1 - key exchange)
+crypto isakmp policy 1
+ authentication pre-share
+ encription aes 256
+ group 5
+crypto isakmp key cisco123 address 193.20.20.2
+
+2.2. IPsec Transform-set (Phase 2 - Protect the traffic that passes through the tunnel)
+crypto ipsec transform-set STRONG esp-3des esp-md5-hmac
+
+3. Crypto map (s kripto mapom objedinjujemo svu konfiguraciju iz faze 1 i 2)
+crypto map VPN 10 ipsec-isakmp
+ set peer 193.20.20.2
+ set transform-set STRONG
+ match address IPsec 
+
+4. Apply a crypto map to the interface
+interface f0/0
+ crypto map VPN
